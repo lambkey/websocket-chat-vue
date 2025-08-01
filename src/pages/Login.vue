@@ -25,6 +25,7 @@
 
 <script lang="ts" setup>
 import { reactive } from 'vue'
+import axios from 'axios'
 
 // do not use same name with ref
 const form = reactive({
@@ -33,8 +34,11 @@ const form = reactive({
 })
 
 const onSubmit = () => {
-  alert('submit!')
+  axios.post('/test',{}).then(res => {
+    console.log(res)
+  })
 }
+
 </script>
 
 <style scoped>
