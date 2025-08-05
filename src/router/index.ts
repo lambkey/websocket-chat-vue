@@ -1,3 +1,4 @@
+import ChatPage from '@/pages/ChatPage.vue'
 import Login from '../pages/Login.vue'
 
 // 通过npm i vue-router，引入路由相关函数
@@ -9,12 +10,16 @@ const router = createRouter({
     routes: [
         {
             path: '/',
-            redirect: '/login'
+            redirect: '/chat'
         }
         ,
         {
             path: '/login',
             component: Login
+        },
+        {
+            path: '/chat',
+            component: ChatPage
         }
     ]
 })

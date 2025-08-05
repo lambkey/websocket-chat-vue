@@ -29,13 +29,13 @@ import axios from 'axios'
 
 // do not use same name with ref
 const form = reactive({
-  username: '',
-  password: ''
+  username: 'dadwadw',
+  password: 'dwadawd'
 })
 
 const onSubmit = () => {
-  axios.post('/test',{}).then(res => {
-    console.log(res)
+  axios.post('/auth/login',form).then(res => {
+    console.log('登录成功',res)
   })
 }
 

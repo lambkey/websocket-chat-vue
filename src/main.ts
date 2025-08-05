@@ -1,4 +1,6 @@
+import './assets/base.css'
 import './assets/main.css'
+import './assets/styles/scrollbar.scss'
 
 import { createApp } from 'vue'
 import ElementPlus from 'element-plus'
@@ -21,6 +23,13 @@ axios.interceptors.request.use(config => {
 // 响应拦截器
 axios.interceptors.response.use(response => {
   console.log('响应参数',response)
+
+  let {data} = response
+
+  if(data.code === 401){
+    router.push('/login')
+  }
+
   return response
 },error => {
   return Promise.reject(error)
