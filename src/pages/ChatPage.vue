@@ -37,6 +37,33 @@ import SelectChatObject from '@/components/SelectChatObject.vue'
 import MessageRecord from '@/components/MessageRecord.vue'
 import InputFrame from '@/components/InputFrame.vue'
 import ChatWith from '@/components/ChatWith.vue'
+import { onBeforeMount } from 'vue'
+
+onBeforeMount(() => {
+  connectionWebsocket()
+})
+
+let connectionWebsocket = ()=>{
+  // 通过websocket连接后端
+  const ws = new WebSocket('ws://127.0.0.1:8888/websocket-chat-boot/chat')
+
+  ws.onopen = () => {
+    console.log('WebSocket连接已打开')
+  }
+
+  ws.onmessage = (event) => {
+    console.log('收到消息:', event.data)
+  }
+
+  ws.onclose = () => {
+    console.log('WebSocket连接已关闭')
+  }
+
+  ws.onerror = (error) => {
+    console.error('WebSocket错误:', error)
+  }
+}
+
 
 </script>
 

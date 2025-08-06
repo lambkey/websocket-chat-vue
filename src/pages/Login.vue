@@ -29,14 +29,19 @@ import axios from 'axios'
 
 // do not use same name with ref
 const form = reactive({
-  username: 'dadwadw',
-  password: 'dwadawd'
+  username: '',
+  password: ''
 })
 
-const onSubmit = () => {
-  axios.post('/auth/login',form).then(res => {
-    console.log('登录成功',res)
-  })
+const onSubmit = async () => {
+  const resp = await axios.post('/auth/login',form)
+  if (resp.data.code === 200) {
+    // 登录成功，跳转到聊天页面
+    window.location.href = '/chat'
+  } else {
+    // 登录失败，显示错误信息
+    alert(resp.data.message || '登录失败，请重试')
+  }
 }
 
 </script>

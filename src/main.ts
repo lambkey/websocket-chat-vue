@@ -9,6 +9,7 @@ import App from './App.vue'
 import axios from 'axios'
 
 axios.defaults.baseURL = import.meta.env.VITE_VUE_APP_INTERFACE_URL
+axios.defaults.withCredentials = true
 
 // axios拦截器定义
 // 请求拦截器
