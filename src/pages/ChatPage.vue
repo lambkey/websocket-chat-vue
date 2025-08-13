@@ -4,7 +4,7 @@
         <el-container>
         <el-aside width="200px">
 
-            <SelectChatObject />
+            <SelectChatObject :online-users="onlineUsers" />
 
         </el-aside>
         <el-container>
@@ -17,7 +17,7 @@
 
           <el-main>
             <!-- 消息记录框 -->
-            <MessageRecord />
+            <MessageRecord :messages="[]" :current-user-id="1" />
 
           </el-main>
 
@@ -37,11 +37,19 @@ import SelectChatObject from '@/components/SelectChatObject.vue'
 import MessageRecord from '@/components/MessageRecord.vue'
 import InputFrame from '@/components/InputFrame.vue'
 import ChatWith from '@/components/ChatWith.vue'
-import { onBeforeMount } from 'vue'
+import { onBeforeMount, reactive, ref } from 'vue'
+import { emitter } from '@/utils/emitter'
 
 onBeforeMount(() => {
   connectionWebsocket()
 })
+
+interface OnlineUser {
+  id: number;
+  username: string;
+}
+
+let onlineUsers = ref<OnlineUser[]>([])
 
 let connectionWebsocket = ()=>{
   // 通过websocket连接后端
@@ -52,7 +60,16 @@ let connectionWebsocket = ()=>{
   }
 
   ws.onmessage = (event) => {
-    console.log('收到消息:', event.data)
+    let {system,message} = JSON.parse(event.data)
+    // 如果是系统消息，说明是在线用户列表
+    if(system){
+      onlineUsers.value = message
+    }else{
+      emitter.emit('messageUpdate', JSON.parse(event.data))
+    }
+
+    
+    
   }
 
   ws.onclose = () => {

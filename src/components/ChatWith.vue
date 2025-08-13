@@ -1,7 +1,7 @@
 <template>
   <div class="chat-with">
-    <div class="user-info">
-      <span class="name">张三</span>
+    <div class="user-info" v-show="currentUserName">
+      <span class="name">{{ currentUserName }}</span>
       <span class="status">在线</span>
     </div>
     <div class="actions">
@@ -15,6 +15,21 @@
 </template>
 
 <script lang="ts" setup>
+import { emitter } from '@/utils/emitter';
+import { onMounted, onUnmounted, ref } from 'vue';
+
+// 定义一个获取当前聊天对象名称
+let currentUserName = ref<string>(); // 默认值
+
+onMounted(()=>{
+  emitter.on('setChatWithUserName', (userName: any) => {
+    currentUserName.value = userName;
+  });
+})
+
+onUnmounted(() => {
+  emitter.off('setChatWithUserName');
+});
 
 </script>
 

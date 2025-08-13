@@ -5,13 +5,12 @@
       <el-input placeholder="搜索联系人" prefix-icon="Search" />
     </div>
     <div class="contact-list">
-      <div class="contact-item" v-for="i in 10" :key="i">
+      <div class="contact-item" v-for="onlineUser in onlineUsers" :key="onlineUser.id" @click="messageList(onlineUser)" >
         <div class="avatar">
           <el-avatar :size="40" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
         </div>
         <div class="contact-info">
-          <div class="name">联系人 {{ i }}</div>
-          <div class="last-message">最后一条消息...</div>
+          <div class="name">{{ onlineUser.username}}</div>
         </div>
       </div>
     </div>
@@ -19,7 +18,31 @@
 </template>
 
 <script lang="ts" setup>
+import axios from 'axios';
+import { emitter } from '@/utils/emitter';
 
+interface OnlineUser {
+  id: number;
+  username: string;
+}
+
+ defineProps<{onlineUsers: OnlineUser[]}>()
+
+ let messageList = (user:OnlineUser)=>{
+  axios.get('/message/list',{
+    params:{
+      fromUserId:user.id,
+      currentPage:1,
+      pageSize:100
+    }
+  }).then(res=>{
+    // 1.加载聊天记录
+    emitter.emit('newMessage', res.data.data)
+
+    // 2.顶部显示当前聊天对象
+    emitter.emit('setChatWithUserName', user.username)
+  })
+ }
 </script>
 
 <style scoped lang="scss">

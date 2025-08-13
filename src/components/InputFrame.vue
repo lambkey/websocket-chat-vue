@@ -1,6 +1,6 @@
 <!-- 聊天输入框 -->
 <template>
-  <div class="input-frame">
+  <div class="input-frame" v-if="currentUserId">
     <div class="toolbar">
       <el-button-group>
         <el-button icon="Picture" text />
@@ -33,23 +33,48 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { Position } from '@element-plus/icons-vue'
+import axios from 'axios'
+import { emitter } from '@/utils/emitter';
 
 const messageText = ref('')
+
+let currentUserId = ref<number>();
 
 const handleSend = () => {
   if (!messageText.value.trim()) return
   
   // TODO: 实现发送消息逻辑
-  console.log('发送消息:', messageText.value)
+  axios.post('/message/send', {
+    toId: currentUserId.value,
+    content: messageText.value,
+    // 其他必要的参数，如接收者ID等
+  }).then(response => {
+    console.log('消息发送成功:', response.data)
+  }).catch(error => {
+    console.error('消息发送失败:', error)
+  })
+
   messageText.value = '' // 发送后清空输入框
 }
+
+onMounted(() => {
+  // 定义一个获取当前聊天对象ID的函数
+  emitter.on('setChatWithUserId', (userId: any) => {
+    currentUserId.value = userId;
+  });
+})
+
+onUnmounted(() => {
+  emitter.off('setChatWithUserId');
+});
+
 </script>
 
 <style scoped>
 .input-frame {
-  height: 280px; /* 增加高度 */
+  height: 350px; /* 增加高度 */
   border: 1px solid #ebeef5;
   border-radius: 4px;
   display: flex;
@@ -64,11 +89,11 @@ const handleSend = () => {
 }
 
 .input-area {
-  flex: 1;
+
   padding: 12px;
   
   :deep(.el-textarea__inner) {
-    height: 100%;
+
     resize: none;
     border: none;
     padding: 0;

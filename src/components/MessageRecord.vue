@@ -1,23 +1,84 @@
 <!-- 消息记录框 -->
 <template>
-  <div class="message-record">
-    <div class="message-list">
-      <div v-for="i in 10" :key="i" :class="['message-item', i % 2 === 0 ? 'sent' : 'received']">
+  <div class="message-record" ref="messageContainer">
+    <div class="message-list" v-if="messages.data.records.length">
+      <div v-for="message in messages.data.records" :key="message.id" :class="['message-item',message.toId  === currentUserId ? 'received' : 'sent']">
         <div class="message-content">
           <div class="avatar">
             <el-avatar :size="32" src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" />
           </div>
           <div class="bubble">
-            这是一条测试消息 {{ i }}
+            {{ message.content }}
           </div>
         </div>
-        <div class="time">{{ new Date().toLocaleTimeString() }}</div>
+        <div class="time">{{ message.createdTime }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
+
+import { emitter } from '@/utils/emitter';
+import { onMounted, onUnmounted, reactive, ref, nextTick } from 'vue';
+import { type Message } from '@/types/types';
+
+let messages = reactive({
+  data: {
+    records: [] as Message[]
+  }
+})
+let currentUserId = ref<number>();
+const messageContainer = ref<HTMLElement | null>(null);
+
+// 格式化日期 YYYY-MM-DD HH:mm:SS
+let dateFormat = (date: string) => {
+  const d = new Date(date);
+  return `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')} ${d.getHours().toString().padStart(2, '0')}:${d.getMinutes().toString().padStart(2, '0')}:${d.getSeconds().toString().padStart(2, '0')}`;
+}
+
+// 滚动到底部的方法
+const scrollToBottom = () => {
+  nextTick(() => {
+    if (messageContainer.value) {
+      messageContainer.value.scrollTop = messageContainer.value.scrollHeight;
+    }
+  });
+};
+
+onMounted(()=>{
+  // 绑定一个事件，点击联系人时获取消息列表
+  emitter.on('newMessage', (data:any) => {
+    // 这里可以添加逻辑来更新消息列表
+    messages.data.records = data.resultPage.records;
+    currentUserId.value = data.currentUser;
+
+    // 同时通知输入框当前聊天对象ID
+    emitter.emit('setChatWithUserId', data.chatWithUser);
+    scrollToBottom(); // 加载新消息列表后滚动
+  });
+
+  // 绑定一个事件，消息更新更新消息列表
+  emitter.on('messageUpdate', (data:any) => {
+
+    let {content,createdTime,fromId,id,toId} = data;
+    createdTime = dateFormat(createdTime);
+    messages.data.records.push({
+      content,
+      createdTime,
+      fromId,
+      id,
+      toId
+    });
+    scrollToBottom(); // 新消息到达后滚动
+    console.log('消息更新:', data);
+  })
+})
+
+onUnmounted(()=>{
+    emitter.off('newMessage')
+    emitter.off('messageUpdate')
+  })
 
 </script>
 
